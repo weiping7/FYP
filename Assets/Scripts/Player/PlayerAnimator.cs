@@ -34,7 +34,7 @@ public class PlayerAnimator : MonoBehaviour
 
     void SpriteDirectionChecker()
     {
-        if(pm.lastHonrizontalVector < 0)
+        if(pm.lastHorizontalVector < 0)
         {
             sr.flipX = true;
         }
