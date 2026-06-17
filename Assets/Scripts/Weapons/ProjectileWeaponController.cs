@@ -10,7 +10,7 @@ public class ProjectileWeaponController : MonoBehaviour
     public float destroyAfterSeconds;
 
     //current stats
-    protected float currentDemage;
+    protected float currentDamage;
     protected float currentSpeed;
     protected float currentCooldownDuration;
     protected int currentPierce;
@@ -18,7 +18,7 @@ public class ProjectileWeaponController : MonoBehaviour
 
     void Awake()
     {
-        currentDemage = weaponData.Demage;
+        currentDamage = weaponData.Damage;
         currentSpeed = weaponData.Speed;
         currentCooldownDuration = weaponData.CooldownDuration;
         currentPierce = weaponData.Pierce;
@@ -83,7 +83,7 @@ public class ProjectileWeaponController : MonoBehaviour
         if (col.CompareTag("Enemy"))
         {
             EnemyStats enemy = col.GetComponent<EnemyStats>();
-            enemy.TakeDemage(currentDemage);
+            enemy.TakeDamage(currentDamage);
             ReducedPierce();
         }
     }

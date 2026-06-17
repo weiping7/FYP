@@ -4276,7 +4276,6 @@ GameObject:
   - component: {fileID: 1847008524}
   - component: {fileID: 1847008525}
   - component: {fileID: 1847008526}
-  - component: {fileID: 1847008527}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -4300,7 +4299,7 @@ MonoBehaviour:
   lastVerticalVector: 0
   moveDir: {x: 0, y: 0}
   lastMovedVector: {x: 0, y: 0}
-  characterData: {fileID: 11400000, guid: ebc7ea6821150f04094dc1a6fc6dba27, type: 2}
+  characterData: {fileID: 0}
 --- !u!61 &1847008520
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4496,20 +4495,6 @@ SortingGroup:
   m_SortingOrder: 0
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
---- !u!114 &1847008527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1847008518}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e0cf8a0c960bc24f979094a86441500, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  characterData: {fileID: 11400000, guid: ebc7ea6821150f04094dc1a6fc6dba27, type: 2}
-  invincibilityDuration: 0.5
 --- !u!1 &1943061162
 GameObject:
   m_ObjectHideFlags: 0

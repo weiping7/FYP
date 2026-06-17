@@ -9,8 +9,8 @@ public class WeaponScriptableObject : ScriptableObject
     //Base stat for weapons
     [SerializeField]
 
-    float demage;
-    public float Demage { get => demage; private set => demage = value; }
+    float damage;
+    public float Damage { get => damage; private set => damage = value; }
 
     [SerializeField]
     float speed;

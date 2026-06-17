@@ -6,20 +6,20 @@ public class EnemyStats : MonoBehaviour
 
     float currentMoveSpeed;
     float currentHealth;
-    float currentDemage;
+    float currentDamage;
 
     private void Awake()
     {
         currentMoveSpeed = enemyData.MoveSpeed;
         currentHealth = enemyData.MaxHealth;
-        currentDemage = enemyData.Demage;
+        currentDamage = enemyData.Damage;
     }
 
-    public void TakeDemage(float dmg)
+    public void TakeDamage(float dmg)
     {
-        currentDemage -= dmg;
+        currentDamage -= dmg;
 
-        if (currentDemage <= 0)
+        if (currentDamage <= 0)
         {
             Kill();
         }
@@ -29,5 +29,20 @@ public class EnemyStats : MonoBehaviour
     public void Kill()
     {
         Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        EnemySpawner es = FindAnyObjectByType<EnemySpawner>();
+        es.OnEnemyKilled();
+    }
+
+    public void OnCollisionStay2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+        {
+            PlayerStats player = col.gameObject.GetComponent<PlayerStats>();
+            player.TakeDamage(currentDamage);
+        }
     }
 }
