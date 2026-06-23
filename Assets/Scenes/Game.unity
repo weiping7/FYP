@@ -509,7 +509,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000e75fd9ee
+  m_ApplyToSortingLayers: 00000000e75fd9eed1b555be
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -808,6 +808,15 @@ MonoBehaviour:
       enemyCount: 10
       spawnCount: 0
       enemyPrefab: {fileID: 7486660345575474478, guid: cf14e85214bed194fab2ee03b009e47d, type: 3}
+    waveQuota: 0
+    spawnInterval: 1
+    spawnCount: 0
+  - waveName: Wave 1
+    enemyGroups:
+    - enemyName: Black Bat
+      enemyCount: 10
+      spawnCount: 0
+      enemyPrefab: {fileID: 7486660345575474478, guid: e49fc6931b268b1458649ebf59a1ff92, type: 3}
     waveQuota: 0
     spawnInterval: 1
     spawnCount: 0
@@ -4519,6 +4528,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1943061163}
+  - component: {fileID: 1943061164}
   m_Layer: 0
   m_Name: MapBoundary
   m_TagString: Untagged
@@ -4545,6 +4555,18 @@ Transform:
   - {fileID: 2089570529}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1943061164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1943061162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9ffbafc04770b640ab37040de61e1e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapBoundary
 --- !u!1 &1993481485
 GameObject:
   m_ObjectHideFlags: 0
