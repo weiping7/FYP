@@ -22,6 +22,7 @@ public class WeaponController : MonoBehaviour
     protected virtual void Update()
     {  
         currentCooldown -= Time.deltaTime;
+        
         if (currentCooldown <= 0f) //Once the tiem become 0, attack
         {
             Attack();

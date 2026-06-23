@@ -40,23 +40,25 @@ public class PlayerStats : MonoBehaviour
     public float invincibilityDuration;
     float invincibilityTimer;
     bool isInvincible;
-    
+
     public void TakeDamage(float dmg)
     {
         if (isInvincible)
         {
-            currentHealth -= dmg;
-
-            invincibilityTimer = invincibilityDuration;
-            isInvincible = true;
-
-            if(currentHealth <= 0)
-            {
-                Kill();
-            }
+            return;
         }
 
+        currentHealth -= dmg;
+
+        invincibilityTimer = invincibilityDuration;
+        isInvincible = true;
+
+        if (currentHealth <= 0)
+        {
+            Kill();
+        }
     }
+
     public void Kill()
     {
         Debug.Log("PLAYER IS DEAD");

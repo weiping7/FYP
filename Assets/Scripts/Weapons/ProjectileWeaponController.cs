@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 
 // A base script for all projectile behavior
 public class ProjectileWeaponController : MonoBehaviour

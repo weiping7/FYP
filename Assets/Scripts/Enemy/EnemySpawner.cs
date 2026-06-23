@@ -1,7 +1,5 @@
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
@@ -27,6 +25,7 @@ public class EnemySpawner : MonoBehaviour
     
     public List<Wave> waves; // A list of all the waves in the game
     public int currentWaveCount; // The index of the current wave [list start from 0]
+    bool isWaitingForNextWave;
 
     [Header("Spawner Attributes")]
     float spawnTimer; //Timer use to dtermine when to spawn the next enemy
@@ -41,23 +40,50 @@ public class EnemySpawner : MonoBehaviour
 
     void Start()
     {
-        //!
-        player = FindAnyObjectByType<PlayerMovement>().transform;
+        PlayerMovement playerMovement = FindAnyObjectByType<PlayerMovement>();
+
+        if (playerMovement == null)
+        {
+            Debug.LogError("EnemySpawner: PlayerMovement not found.");
+            enabled = false;
+            return;
+        }
+
+        if (waves == null || waves.Count == 0)
+        {
+            Debug.LogError("EnemySpawner: No waves assigned.");
+            enabled = false;
+            return;
+        }
+
+        if (relativeSpawnPoints == null || relativeSpawnPoints.Count == 0)
+        {
+            Debug.LogError("EnemySpawner: No spawn points assigned.");
+            enabled = false;
+            return;
+        }
+
+        player = playerMovement.transform;
         CalculateWaveQuota();
-        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(currentWaveCount < waves.Count && waves[currentWaveCount].spawnCount == 0)
+        if (currentWaveCount >= waves.Count)
+        {
+            return;
+        }
+
+        if (waves[currentWaveCount].spawnCount >= waves[currentWaveCount].waveQuota
+            && enemiesAlive <= 0
+            && !isWaitingForNextWave)
         {
             StartCoroutine(BeginNextWave());
         }
 
         spawnTimer += Time.deltaTime;
 
-        //Check if it's time to spawn the next enemy
         if (spawnTimer >= waves[currentWaveCount].spawnInterval)
         {
             spawnTimer = 0f;
@@ -67,15 +93,18 @@ public class EnemySpawner : MonoBehaviour
 
     IEnumerator BeginNextWave()
     {
-        //Wave for 'waveInterval' seconds before starting the next wave
+        isWaitingForNextWave = true;
+
         yield return new WaitForSeconds(waveInterval);
 
-        //10f there more waves to start after the current wave, move on to the next wave
         if (currentWaveCount < waves.Count - 1)
         {
             currentWaveCount++;
             CalculateWaveQuota();
+            spawnTimer = 0f;
         }
+
+        isWaitingForNextWave = false;
     }
 
     void CalculateWaveQuota()
@@ -91,7 +120,29 @@ public class EnemySpawner : MonoBehaviour
         Debug.LogWarning(currentWaveQuota);
     }
 
-    
+    Vector2 GetSpawnPosition()
+    {
+        Vector2 fallbackPosition = player.position;
+
+        for (int i = 0; i < 10; i++)
+        {
+            Transform spawnPoint = relativeSpawnPoints[Random.Range(0, relativeSpawnPoints.Count)];
+
+            Vector2 spawnPosition =
+                player.position +
+                relativeSpawnPoints[Random.Range(0, relativeSpawnPoints.Count)].position;
+
+            fallbackPosition = spawnPosition;
+
+            if (MapBoundary.Instance == null || MapBoundary.Instance.IsInside(spawnPosition, 1f))
+            {
+                return spawnPosition;
+            }
+        }
+
+        return MapBoundary.Instance.ClampPosition(fallbackPosition, 1f);
+    }
+
     /// <summary>
     /// The method will stop spawning enemies if the enemies on the map is maximum
     /// The method will only spawn enemies in a particular wave until it is time for the next wave's enemies to be spawned
@@ -114,8 +165,16 @@ public class EnemySpawner : MonoBehaviour
 
                     }
 
-                    // spawn the enemy at a player that close to player
-                    Instantiate(enemyGroup.enemyPrefab, player.position + relativeSpawnPoints[Random.Range(0, relativeSpawnPoints.Count)].position, Quaternion.identity);
+                    if (enemyGroup.enemyPrefab == null)
+                    {
+                        Debug.LogWarning($"EnemySpawner: Enemy prefab missing in group {enemyGroup.enemyName}.");
+                        continue;
+                    }
+
+
+                    Vector2 spawnPosition = GetSpawnPosition();
+
+                    Instantiate(enemyGroup.enemyPrefab, spawnPosition, Quaternion.identity);
 
                     enemyGroup.spawnCount++;
                     waves[currentWaveCount].spawnCount++;

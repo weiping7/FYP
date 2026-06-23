@@ -804,10 +804,10 @@ MonoBehaviour:
   waves:
   - waveName: Wave 1
     enemyGroups:
-    - enemyName: Black Bat
+    - enemyName: Bat
       enemyCount: 10
       spawnCount: 0
-      enemyPrefab: {fileID: 7486660345575474478, guid: e49fc6931b268b1458649ebf59a1ff92, type: 3}
+      enemyPrefab: {fileID: 7486660345575474478, guid: cf14e85214bed194fab2ee03b009e47d, type: 3}
     waveQuota: 0
     spawnInterval: 1
     spawnCount: 0

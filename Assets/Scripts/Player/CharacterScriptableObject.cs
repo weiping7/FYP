@@ -1,5 +1,3 @@
-using NUnit.Framework.Constraints;
-using System.IO.Enumeration;
 using UnityEngine;
 
 [CreateAssetMenu(fileName ="CharacterScriptableObject", menuName ="ScriptableObjects/Character")]

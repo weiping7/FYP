@@ -17,13 +17,12 @@ public class EnemyStats : MonoBehaviour
 
     public void TakeDamage(float dmg)
     {
-        currentDamage -= dmg;
+        currentHealth -= dmg;
 
-        if (currentDamage <= 0)
+        if (currentHealth <= 0)
         {
             Kill();
         }
-
     }
 
     public void Kill()
@@ -34,7 +33,10 @@ public class EnemyStats : MonoBehaviour
     private void OnDestroy()
     {
         EnemySpawner es = FindAnyObjectByType<EnemySpawner>();
-        es.OnEnemyKilled();
+        if (es != null && Application.isPlaying)
+        {
+            es.OnEnemyKilled();
+        }
     }
 
     public void OnCollisionStay2D(Collision2D col)
