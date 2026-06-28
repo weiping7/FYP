@@ -9,8 +9,9 @@ public class KnifeBehavior : ProjectileWeaponController
         base.Start();
     }
 
-    void Update()
+    protected override void Update()
     {
-        transform.position += direction * weaponData.Speed * Time.deltaTime;// Set the mnovement of Knife
+        base.Update();
+        transform.position += direction * currentSpeed * Time.deltaTime;// Set the movement of Knife
     }
 }

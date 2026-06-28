@@ -1,12 +1,21 @@
 using UnityEngine;
 
 // A base script for all projectile behavior
-public class ProjectileWeaponController : MonoBehaviour
+public class ProjectileWeaponController : MonoBehaviour, IPoolable
 {
     public WeaponScriptableObject weaponData;
 
     protected Vector3 direction;
     public float destroyAfterSeconds;
+
+    Vector3 originalScale;
+
+    [SerializeField]
+    float visualRotationOffset = 0f;
+
+    float lifetimeTimer;
+    bool isReleased;
+    Collider2D projectileCollider;
 
     //current stats
     protected float currentDamage;
@@ -21,59 +30,33 @@ public class ProjectileWeaponController : MonoBehaviour
         currentSpeed = weaponData.Speed;
         currentCooldownDuration = weaponData.CooldownDuration;
         currentPierce = weaponData.Pierce;
+
+        projectileCollider = GetComponent<Collider2D>();
+
+        originalScale = transform.localScale;
     }
 
     protected virtual void Start()
     {
-        Destroy(gameObject, destroyAfterSeconds);
+       
     }
 
+    protected virtual void Update()
+    {
+        lifetimeTimer += Time.deltaTime;
+
+        if (lifetimeTimer >= destroyAfterSeconds)
+        {
+            Release();
+        }
+    }
     public void DirectionChecker(Vector3 dir)
     {
-        direction = dir;
+        direction = dir.normalized;
 
-        float dirx = direction.x;
-        float diry = direction.y;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        Vector3 scale = transform.localScale;
-        Vector3 rotation = transform.rotation.eulerAngles;
-
-        if(dirx < 0 && diry == 0) // left
-        {
-            scale.x = scale.x * -1;
-            scale.y = scale.y * -1; 
-        }
-        else if(dirx == 0 && diry < 0) //down
-        {
-            scale.y = scale.y * -1;
-        }
-        else if(dirx == 0 && diry > 0) //up
-        {
-            scale.x = scale.x * -1;
-        }
-        else if(dir.x > 0 && dir.y > 0) //right up
-        {
-            rotation.z = 0f;
-        }
-        else if(dir.x > 0 && dir.y < 0) //right down
-        {
-            rotation.z = -90f;
-        }
-        else if(dir.x < 0 && dir.y > 0) //left up
-        {
-            scale.x = scale.x * -1;
-            scale.y = scale.y * -1;
-            rotation.z = -90f;
-        }
-        else if(dir.x < 0 && dir.y < 0) //left down
-        {
-            scale.x = scale.x * -1;
-            scale.y = scale.y * -1;
-            rotation.z = 0f;
-        }
-
-            transform.localScale = scale;
-        transform.rotation = Quaternion.Euler(rotation); // Can't simply set the vector bacause cannot convert
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     protected virtual void OnTriggerEnter2D(Collider2D col)
@@ -90,7 +73,58 @@ public class ProjectileWeaponController : MonoBehaviour
     void ReducedPierce()
     {
         currentPierce--;
-        if(currentPierce < 0)
+
+        if (currentPierce < 0)
+        {
+            Release();
+        }
+    }
+
+    public virtual void OnGetFromPool()
+    {
+        currentDamage = weaponData.Damage;
+        currentSpeed = weaponData.Speed;
+        currentCooldownDuration = weaponData.CooldownDuration;
+        currentPierce = weaponData.Pierce;
+
+        lifetimeTimer = 0f;
+        isReleased = false;
+        direction = Vector3.zero;
+
+        transform.rotation = Quaternion.identity;
+
+        if (projectileCollider != null)
+        {
+            projectileCollider.enabled = true;
+        }
+    }
+
+    public virtual void OnReturnToPool()
+    {
+        direction = Vector3.zero;
+        lifetimeTimer = 0f;
+        isReleased = true;
+
+        if (projectileCollider != null)
+        {
+            projectileCollider.enabled = false;
+        }
+    }
+
+    protected void Release()
+    {
+        if (isReleased)
+        {
+            return;
+        }
+
+        isReleased = true;
+
+        if (ObjectPoolManager.Instance != null)
+        {
+            ObjectPoolManager.Instance.ReleaseObject(gameObject);
+        }
+        else
         {
             Destroy(gameObject);
         }

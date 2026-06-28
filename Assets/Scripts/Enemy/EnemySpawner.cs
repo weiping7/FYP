@@ -22,7 +22,12 @@ public class EnemySpawner : MonoBehaviour
         public int spawnCount;  // The number of enemies of this type already spawned in this wave
         public GameObject enemyPrefab;
     }
-    
+
+    [Header("Pooling")]
+    public bool useObjectPooling = true;
+
+    public static readonly List<EnemyStats> activeEnemies = new List<EnemyStats>();
+
     public List<Wave> waves; // A list of all the waves in the game
     public int currentWaveCount; // The index of the current wave [list start from 0]
     bool isWaitingForNextWave;
@@ -37,6 +42,12 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Spawn Position")]
     public List<Transform> relativeSpawnPoints; // A list to store all the relative spawn points of enemies
+
+
+    [Header("Spawn Randomness")]
+    public float spawnRadius = 4f;
+    public float enemySpacing = 0.5f;
+    public float minDistanceFromPlayer = 5f;
 
     void Start()
     {
@@ -124,23 +135,33 @@ public class EnemySpawner : MonoBehaviour
     {
         Vector2 fallbackPosition = player.position;
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 20; i++)
         {
             Transform spawnPoint = relativeSpawnPoints[Random.Range(0, relativeSpawnPoints.Count)];
 
-            Vector2 spawnPosition =
-                player.position +
-                relativeSpawnPoints[Random.Range(0, relativeSpawnPoints.Count)].position;
+            Vector2 spawnCenter = spawnPoint.position;
+            Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+            Vector2 spawnPosition = spawnCenter + randomOffset;
 
             fallbackPosition = spawnPosition;
 
-            if (MapBoundary.Instance == null || MapBoundary.Instance.IsInside(spawnPosition, 1f))
+            if (Vector2.Distance(player.position, spawnPosition) < minDistanceFromPlayer)
+            {
+                continue;
+            }
+
+            if (MapBoundary.Instance == null || MapBoundary.Instance.IsInside(spawnPosition, enemySpacing))
             {
                 return spawnPosition;
             }
         }
 
-        return MapBoundary.Instance.ClampPosition(fallbackPosition, 1f);
+        if (MapBoundary.Instance != null)
+        {
+            return MapBoundary.Instance.ClampPosition(fallbackPosition, enemySpacing);
+        }
+
+        return fallbackPosition;
     }
 
     /// <summary>
@@ -174,7 +195,14 @@ public class EnemySpawner : MonoBehaviour
 
                     Vector2 spawnPosition = GetSpawnPosition();
 
-                    Instantiate(enemyGroup.enemyPrefab, spawnPosition, Quaternion.identity);
+                    if (useObjectPooling && ObjectPoolManager.Instance != null)
+                    {
+                        ObjectPoolManager.Instance.GetObject(enemyGroup.enemyPrefab, spawnPosition, Quaternion.identity);
+                    }
+                    else
+                    {
+                        Instantiate(enemyGroup.enemyPrefab, spawnPosition, Quaternion.identity);
+                    }
 
                     enemyGroup.spawnCount++;
                     waves[currentWaveCount].spawnCount++;

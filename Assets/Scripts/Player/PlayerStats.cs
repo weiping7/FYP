@@ -1,19 +1,45 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerStats : MonoBehaviour
 {
     public CharacterScriptableObject characterData;
 
-    float currentHealth;
+    [Header("Health")]
+    public float currentHealth;
+    public float maxHealth;
+
+
     float currentRecovery;
     float currentMoveSpeed;
     float currentMight;
     float currentProjectileSpeed;
+    
+    //i-Frames
+        [Header("I-Frames")]
+        public float invincibilityDuration = 0.5f;
+        float invincibilityTimer;
+        bool isInvincible;
+
+    [Header("Health Regen")]
+    public float regenDelay = 3f;
+    public float regenAmount = 2f;
+    public float regenInterval = 1f;
+
+    float timeSinceLastDamage;
+    float regenTimer;
+
+    [Header("UI")]
+    public Slider healthBar;
 
     private void Awake()
     {
         //Assign the variables
-        currentHealth = characterData.MaxHealth;
+        maxHealth = characterData.MaxHealth;
+        currentHealth = maxHealth;
+
+        UpdateHealthBar();
+
         currentRecovery = characterData.Recovery;
         currentMoveSpeed = characterData.MoveSpeed;
         currentMight = characterData.Might;
@@ -23,46 +49,89 @@ public class PlayerStats : MonoBehaviour
 
     void Update()
     {
-        if(invincibilityTimer > 0)
+        HandleInvincibility();
+        HandleHealthRegen();
+    }
+
+    void HandleInvincibility()
+    {
+        if (invincibilityTimer > 0)
         {
             invincibilityTimer -= Time.deltaTime;
-
         }
-        // if the invincibility timer has reached 0, set the invincibility flag to false
-        else if (isInvincible)
+        else
         {
             isInvincible = false;
         }
     }
 
-    //i-Frames
-    [Header("I-Frames")]
-    public float invincibilityDuration;
-    float invincibilityTimer;
-    bool isInvincible;
+    void HandleHealthRegen()
+    {
+        if (currentHealth >= maxHealth)
+        {
+            return;
+        }
 
-    public void TakeDamage(float dmg)
+        timeSinceLastDamage += Time.deltaTime;
+
+        if (timeSinceLastDamage < regenDelay)
+        {
+            return;
+        }
+
+        regenTimer += Time.deltaTime;
+
+        if (regenTimer >= regenInterval)
+        {
+            regenTimer = 0f;
+            Heal(regenAmount);
+        }
+    }
+
+    public void TakeDamage(float damage)
     {
         if (isInvincible)
         {
             return;
         }
 
-        currentHealth -= dmg;
+        currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        timeSinceLastDamage = 0f;
+        regenTimer = 0f;
 
         invincibilityTimer = invincibilityDuration;
         isInvincible = true;
 
+        UpdateHealthBar();
+
         if (currentHealth <= 0)
         {
-            Kill();
+            Die();
         }
     }
 
-    public void Kill()
+    public void Heal(float amount)
+    {
+        currentHealth += amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        UpdateHealthBar();
+    }
+
+    void UpdateHealthBar()
+    {
+        if (healthBar != null)
+        {
+            healthBar.value = currentHealth / maxHealth;
+        }
+    }
+
+    void Die()
     {
         Debug.Log("PLAYER IS DEAD");
     }
 
-    
+
 }

@@ -3,6 +3,8 @@
 public class KnifeController : WeaponController
 {
 
+    public bool useObjectPooling = true;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
     {
@@ -22,28 +24,44 @@ public class KnifeController : WeaponController
         // Calculate the direction from the player to the enemy
         Vector3 direction = (nearestEnemy.position - transform.position).normalized;
 
-        GameObject spawnedKnife = Instantiate(weaponData.Prefab);
-        spawnedKnife.transform.position = transform.position;
+        GameObject spawnedKnife;
 
-        spawnedKnife.GetComponent<KnifeBehavior>().DirectionChecker(direction);
+        if (useObjectPooling && ObjectPoolManager.Instance != null)
+        {
+            spawnedKnife = ObjectPoolManager.Instance.GetObject(
+                weaponData.Prefab,
+                transform.position,
+                Quaternion.identity
+            );
+        }
+        else
+        {
+            spawnedKnife = Instantiate(weaponData.Prefab, transform.position, Quaternion.identity);
+        }
+
+        KnifeBehavior knife = spawnedKnife.GetComponent<KnifeBehavior>();
+
+        if (knife != null)
+        {
+            knife.DirectionChecker(direction);
+        }
 
 
     }
 
     Transform FindNearestEnemy()
     {
-        // Find all objects on the field with the tag "Enemy"
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
         Transform nearest = null;
         float shortestDistance = Mathf.Infinity;
 
-        foreach (GameObject enemy in enemies)
+        foreach (EnemyStats enemy in EnemySpawner.activeEnemies)
         {
-            float distance = Vector2.Distance(
-                transform.position,      // Player position
-                enemy.transform.position // Enemy position
-            );
+            if (enemy == null || !enemy.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            float distance = Vector2.Distance(transform.position, enemy.transform.position);
 
             if (distance < shortestDistance)
             {
@@ -52,7 +70,7 @@ public class KnifeController : WeaponController
             }
         }
 
-        return nearest; // If there are no enemies, return null.
+        return nearest;
     }
 }
   
